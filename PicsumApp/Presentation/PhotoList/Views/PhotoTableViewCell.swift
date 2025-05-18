@@ -96,13 +96,17 @@ final class PhotoTableViewCell: UITableViewCell {
     func configure(with photo: Photo) {
         self.authorLabel.text = photo.author
         
-        self.sizeLabel.text = "Size: \(photo.sizeText)"
-        
+        if photo.isHighResolution {
+            self.sizeLabel.text = "Size: Original(\(photo.sizeText)) - Optimized(\(photo.optimizedSizeText))"
+        } else {
+            self.sizeLabel.text = "Size: \(photo.sizeText)"
+        }
+
         self.aspectRatioConstraint?.isActive = false
         self.aspectRatioConstraint = self.photoImageView.heightAnchor.constraint(equalTo: self.photoImageView.widthAnchor, multiplier: photo.aspectRatio)
         self.aspectRatioConstraint?.isActive = true
         
-        self.loadImage(from: photo.downloadURL)
+        self.loadImage(from: photo.optimizedImageURL)
     }
     
     private func loadImage(from url: URL) {

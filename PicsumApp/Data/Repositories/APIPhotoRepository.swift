@@ -8,7 +8,7 @@ import Foundation
 
 class APIPhotoRepository: PhotoRepositoryProtocol {
     private let network: NetworkService
-    private let baseURL = "https://picsum.photos/v2/list"
+    private let baseURL = Constants.API.Endpoints.list
     
     init(network: NetworkService) {
         self.network = network
