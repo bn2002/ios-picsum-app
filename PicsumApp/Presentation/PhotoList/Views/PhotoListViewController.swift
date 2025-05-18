@@ -13,7 +13,6 @@ final class PhotoListViewController: UIViewController {
         let tableView = UITableView()
         tableView.delegate = self
         tableView.dataSource = self
-        tableView.prefetchDataSource = self
         tableView.register(PhotoTableViewCell.self, forCellReuseIdentifier: PhotoTableViewCell.reuseIdentifier)
         tableView.separatorStyle = .none
         tableView.translatesAutoresizingMaskIntoConstraints = false
@@ -40,10 +39,12 @@ final class PhotoListViewController: UIViewController {
     // MARK: - Properties
     private var viewModel: PhotoListViewModel
     private var isLoadingMore = false
-    private var imageLoadTasks: [IndexPath: URLSessionDataTask] = [:]
+    private var imageLoadTasks: ThreadSafeDictionary<IndexPath, String> = ThreadSafeDictionary()
     private var imageLoad: [IndexPath: Data] = [:]
     private var loadingCells: Set<IndexPath> = []
     private var didPreloadInitialImages = false
+    private var scrollTimer: Timer?
+    private let scrollStopDelay: TimeInterval = 0.1
     
     // MARK: - Initialization
     init(viewModel: PhotoListViewModel) {
@@ -128,7 +129,6 @@ final class PhotoListViewController: UIViewController {
             return
         }
         
-        print("Preloading images for visible index paths: \(visibleIndexPaths)")
         self.loadImages(for: visibleIndexPaths)
     }
     
@@ -139,7 +139,6 @@ final class PhotoListViewController: UIViewController {
             
             // Check cache
             guard self.imageLoad[indexPath] == nil else {
-                print("Hit cache: \(indexPath)")
                 DispatchQueue.main.async {
                     if let cell = self.tableView.cellForRow(at: indexPath) as? PhotoTableViewCell,
                        let data = self.imageLoad[indexPath] {
@@ -152,31 +151,26 @@ final class PhotoListViewController: UIViewController {
             
             // Mark cell as loading
             self.loadingCells.insert(indexPath)
-            
-            let task = URLSession.shared.dataTask(with: photo.optimizedImageURL) { [weak self] data, response, error in
+            let taskId = ImageLoader.shared.loadImage(from: photo.optimizedImageURL) { [weak self] image in
                 guard let `self` = self else { return }
-                
-                DispatchQueue.main.async {
-                    self.loadingCells.remove(indexPath)
-                    
-                    if let data = data {
-                        self.imageLoad[indexPath] = data
-                        if let cell = self.tableView.cellForRow(at: indexPath) as? PhotoTableViewCell {
-                            cell.configure(with: photo)
-                            cell.setImage(data: data)
-                        }
-                    } else if let cell = self.tableView.cellForRow(at: indexPath) as? PhotoTableViewCell {
-                        // If load failed, reset cell state
-                        cell.configure(with: photo)
-                    }
-                }
+                self.loadingCells.remove(indexPath)
+                if let image = image {
+                   self.imageLoad[indexPath] = image
+                   if let cell = self.tableView.cellForRow(at: indexPath) as? PhotoTableViewCell {
+                       cell.configure(with: photo)
+                       cell.setImage(data: image)
+                   }
+               } else if let cell = self.tableView.cellForRow(at: indexPath) as? PhotoTableViewCell {
+                   // If load failed, reset cell state
+                   cell.configure(with: photo)
+               }
                 self.imageLoadTasks.removeValue(forKey: indexPath)
             }
             
-            // Cancel existing task
-            self.imageLoadTasks[indexPath]?.cancel()
-            self.imageLoadTasks[indexPath] = task
-            task.resume()
+            if let preTaskId = self.imageLoadTasks[indexPath] {
+                ImageLoader.shared.cancelTask(with: preTaskId)
+            }
+            self.imageLoadTasks[indexPath] = taskId
         }
     }
     
@@ -211,25 +205,16 @@ extension PhotoListViewController: UITableViewDataSource {
         }
         
         let photo = self.viewModel.photos.value[indexPath.row]
+        cell.configure(with: photo)
         
         // If we have cached image data, show image
         if let cachedData = self.imageLoad[indexPath] {
-            cell.configure(with: photo)
             cell.setImage(data: cachedData)
-        } else {
-            // If cell is not in loading state, start loading
-            cell.configure(with: photo)
-            if !self.loadingCells.contains(indexPath) {
-                self.loadImages(for: [indexPath])
-            }
         }
         
         return cell
     }
     
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        print("Selected cell at index path: \(indexPath)")
-    }
 }
 
 // MARK: - UITableViewDelegate
@@ -257,21 +242,50 @@ extension PhotoListViewController: UISearchBarDelegate {
     }
 }
 
-// MARK: - UITableViewDataSourcePrefetching
-extension PhotoListViewController: UITableViewDataSourcePrefetching {
-    func tableView(_ tableView: UITableView, prefetchRowsAt indexPaths: [IndexPath]) {
-        print("Prefetching images for index paths: \(indexPaths)")
-        self.loadImages(for: indexPaths)
+// MARK: - UIScrollViewDelegate
+extension PhotoListViewController: UIScrollViewDelegate {
+    func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
+        self.imageLoadTasks.values.forEach { taskId in
+            ImageLoader.shared.cancelTask(with: taskId)
+        }
+        self.imageLoadTasks.removeAll()
     }
     
-    func tableView(_ tableView: UITableView, cancelPrefetchingForRowsAt indexPaths: [IndexPath]) {
-        print("Calcel Prefetching images for index paths: \(indexPaths)")
-        for indexPath in indexPaths {
-            if let task = self.imageLoadTasks[indexPath] {
-                task.cancel()
-                self.imageLoadTasks.removeValue(forKey: indexPath)
-                self.loadingCells.remove(indexPath)
-            }
+    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+        self.handleScrollStopped()
+    }
+    
+    func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+        if !decelerate {
+            self.handleScrollStopped()
         }
+    }
+    
+    private func handleScrollStopped() {
+        self.scrollTimer?.invalidate()
+        self.scrollTimer = Timer.scheduledTimer(withTimeInterval: scrollStopDelay, repeats: false) { [weak self] _ in
+           self?.loadVisibleImages()
+        }
+    }
+    
+    private func loadVisibleImages() {
+        // Load image for visible cell
+        let visibleIndexPaths = tableView.indexPathsForVisibleRows ?? []
+        self.loadImages(for: visibleIndexPaths)
+        
+        // After load for visible cell, prefetch next image
+        let nextIndexPaths = calculateNextIndexPathsToPrefetch(after: visibleIndexPaths)
+        self.loadImages(for: nextIndexPaths)
+    }
+    
+    private func calculateNextIndexPathsToPrefetch(after visibleIndexPaths: [IndexPath]) -> [IndexPath] {
+        guard let lastVisible = visibleIndexPaths.last?.item else { return [] }
+
+        let nextItems = (1...5) // Prefetch 5 next item
+           .map { lastVisible + $0 }
+           .filter { $0 < self.viewModel.photos.value.count }
+           .map { IndexPath(item: $0, section: 0) }
+
+        return nextItems
     }
 }
