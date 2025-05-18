@@ -33,6 +33,7 @@
 		44F41B4E2DDA4B310040A64A /* ImageCacheProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44F41B4D2DDA4B270040A64A /* ImageCacheProtocol.swift */; };
 		44F41B502DDA4BDA0040A64A /* MemoryImageCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44F41B4F2DDA4BC90040A64A /* MemoryImageCache.swift */; };
 		44F41B522DDA4DFF0040A64A /* ImageCacheManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44F41B512DDA4DFD0040A64A /* ImageCacheManager.swift */; };
+		44F41B542DDA57970040A64A /* DiskImageCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44F41B532DDA57910040A64A /* DiskImageCache.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -83,6 +84,7 @@
 		44F41B4D2DDA4B270040A64A /* ImageCacheProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageCacheProtocol.swift; sourceTree = "<group>"; };
 		44F41B4F2DDA4BC90040A64A /* MemoryImageCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryImageCache.swift; sourceTree = "<group>"; };
 		44F41B512DDA4DFD0040A64A /* ImageCacheManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageCacheManager.swift; sourceTree = "<group>"; };
+		44F41B532DDA57910040A64A /* DiskImageCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiskImageCache.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -291,6 +293,7 @@
 		44F41B4C2DDA49750040A64A /* Cache */ = {
 			isa = PBXGroup;
 			children = (
+				44F41B532DDA57910040A64A /* DiskImageCache.swift */,
 				44F41B512DDA4DFD0040A64A /* ImageCacheManager.swift */,
 				44F41B4F2DDA4BC90040A64A /* MemoryImageCache.swift */,
 				44F41B4D2DDA4B270040A64A /* ImageCacheProtocol.swift */,
@@ -446,6 +449,7 @@
 				44F41B522DDA4DFF0040A64A /* ImageCacheManager.swift in Sources */,
 				44F41B4E2DDA4B310040A64A /* ImageCacheProtocol.swift in Sources */,
 				44E27EBD2DD8EB6D00D716A7 /* Observable.swift in Sources */,
+				44F41B542DDA57970040A64A /* DiskImageCache.swift in Sources */,
 				447B7C662DD85E8E006A4E64 /* PhotoRepositoryProtocol.swift in Sources */,
 				44F41B412DD97FFD0040A64A /* UIScreen+Extensions.swift in Sources */,
 				44F41B472DD9B4A70040A64A /* Collection+Extensions.swift in Sources */,

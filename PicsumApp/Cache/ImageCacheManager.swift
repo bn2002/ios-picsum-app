@@ -10,17 +10,22 @@ import UIKit
 final class ImageCacheManager {
     static let shared = ImageCacheManager()
     
-    private let memoryCache: ImageCacheProtocol
+    private let cacheProviders: [ImageCacheProtocol]
     
     private init() {
-        self.memoryCache = MemoryImageCache(maxSize: 100)
+        self.cacheProviders = [
+            MemoryImageCache(maxSize: 100),
+            DiskImageCache()
+        ]
     }
     
     func getImage(for url: URL) -> Data? {
         let key = url.absoluteString
-        if let image = self.memoryCache.getImage(for: key) {
-            print("Hit cache: \(key)")
-            return image
+        for provider in self.cacheProviders {
+            if let image = provider.getImage(for: key) {
+                print("\(provider.identifier) Hit Cache: \(key)")
+                return image
+            }
         }
         print("Miss cache: \(key)")
         return nil
@@ -29,15 +34,21 @@ final class ImageCacheManager {
     func setImage(_ image: Data, for url: URL) {
         let key = url.absoluteString
         print("Save cache: \(key)")
-        self.memoryCache.setImage(image, for: key)
+        for provider in self.cacheProviders {
+            provider.setImage(image, for: key)
+        }
     }
     
     func removeImage(for url: URL) {
         let key = url.absoluteString
-        self.memoryCache.removeImage(for: key)
+        for provider in self.cacheProviders {
+            provider.removeImage(for: key)
+        }
     }
        
     func clearCache() {
-        self.memoryCache.clear()
+        for provider in self.cacheProviders {
+            provider.clear()
+        }
     }
 }

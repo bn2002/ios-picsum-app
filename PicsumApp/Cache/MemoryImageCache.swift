@@ -9,6 +9,7 @@ import UIKit
 
 class MemoryImageCache: ImageCacheProtocol {
     private let cache = NSCache<NSString, NSData>()
+    let identifier: String = "MemoryImageCache"
     
     init(maxSize: Int = 30) {
         self.cache.totalCostLimit = maxSize * 1024 * 1024 // MB
