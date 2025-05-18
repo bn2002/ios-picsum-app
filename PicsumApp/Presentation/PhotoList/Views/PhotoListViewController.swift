@@ -13,6 +13,7 @@ final class PhotoListViewController: UIViewController {
         let tableView = UITableView()
         tableView.delegate = self
         tableView.dataSource = self
+        tableView.prefetchDataSource = self
         tableView.register(PhotoTableViewCell.self, forCellReuseIdentifier: PhotoTableViewCell.reuseIdentifier)
         tableView.separatorStyle = .none
         tableView.translatesAutoresizingMaskIntoConstraints = false
@@ -39,6 +40,10 @@ final class PhotoListViewController: UIViewController {
     // MARK: - Properties
     private var viewModel: PhotoListViewModel
     private var isLoadingMore = false
+    private var imageLoadTasks: [IndexPath: URLSessionDataTask] = [:]
+    private var imageLoad: [IndexPath: Data] = [:]
+    private var loadingCells: Set<IndexPath> = []
+    private var didPreloadInitialImages = false
     
     // MARK: - Initialization
     init(viewModel: PhotoListViewModel) {
@@ -84,8 +89,17 @@ final class PhotoListViewController: UIViewController {
     }
     
     private func setupBindings() {
-        self.viewModel.photos.observe(on: self) { [weak self] _ in
-            self?.tableView.reloadData()
+        self.viewModel.photos.observe(on: self) { [weak self] photos in
+            guard let `self` = self else { return }
+            self.tableView.reloadData()
+            
+            // Call only once when photos are loaded(initial images)
+            if !self.didPreloadInitialImages && !photos.isEmpty {
+                DispatchQueue.main.async {
+                    self.didPreloadInitialImages = true
+                    self.preloadImagesForVisibleCells()
+                }
+            }
         }
         
         self.viewModel.error.observe(on: self) { [weak self] error in
@@ -103,6 +117,66 @@ final class PhotoListViewController: UIViewController {
                 self.refreshControl.endRefreshing()
                 self.isLoadingMore = false
             }
+        }
+    }
+    
+    private func preloadImagesForVisibleCells() {
+        // If no visible cells, load first few items
+        guard let visibleIndexPaths = self.tableView.indexPathsForVisibleRows, !visibleIndexPaths.isEmpty else {
+            let initialIndexPaths = (0..<min(3, self.viewModel.photos.value.count)).map { IndexPath(row: $0, section: 0) }
+            self.loadImages(for: initialIndexPaths)
+            return
+        }
+        
+        print("Preloading images for visible index paths: \(visibleIndexPaths)")
+        self.loadImages(for: visibleIndexPaths)
+    }
+    
+    private func loadImages(for indexPaths: [IndexPath]) {
+        for indexPath in indexPaths {
+            guard indexPath.row < self.viewModel.photos.value.count else { continue }
+            let photo = self.viewModel.photos.value[indexPath.row]
+            
+            // Check cache
+            guard self.imageLoad[indexPath] == nil else {
+                print("Hit cache: \(indexPath)")
+                DispatchQueue.main.async {
+                    if let cell = self.tableView.cellForRow(at: indexPath) as? PhotoTableViewCell,
+                       let data = self.imageLoad[indexPath] {
+                        cell.configure(with: photo)
+                        cell.setImage(data: data)
+                    }
+                }
+                continue
+            }
+            
+            // Mark cell as loading
+            self.loadingCells.insert(indexPath)
+            
+            let task = URLSession.shared.dataTask(with: photo.optimizedImageURL) { [weak self] data, response, error in
+                guard let `self` = self else { return }
+                
+                DispatchQueue.main.async {
+                    self.loadingCells.remove(indexPath)
+                    
+                    if let data = data {
+                        self.imageLoad[indexPath] = data
+                        if let cell = self.tableView.cellForRow(at: indexPath) as? PhotoTableViewCell {
+                            cell.configure(with: photo)
+                            cell.setImage(data: data)
+                        }
+                    } else if let cell = self.tableView.cellForRow(at: indexPath) as? PhotoTableViewCell {
+                        // If load failed, reset cell state
+                        cell.configure(with: photo)
+                    }
+                }
+                self.imageLoadTasks.removeValue(forKey: indexPath)
+            }
+            
+            // Cancel existing task
+            self.imageLoadTasks[indexPath]?.cancel()
+            self.imageLoadTasks[indexPath] = task
+            task.resume()
         }
     }
     
@@ -130,14 +204,31 @@ extension PhotoListViewController: UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let cell = tableView.dequeueReusableCell(withIdentifier: PhotoTableViewCell.reuseIdentifier, for: indexPath) as? PhotoTableViewCell else {
+        guard
+            let cell = tableView.dequeueReusableCell(withIdentifier: PhotoTableViewCell.reuseIdentifier, for: indexPath) as? PhotoTableViewCell
+        else {
             return UITableViewCell()
         }
         
         let photo = self.viewModel.photos.value[indexPath.row]
-        cell.configure(with: photo)
+        
+        // If we have cached image data, show image
+        if let cachedData = self.imageLoad[indexPath] {
+            cell.configure(with: photo)
+            cell.setImage(data: cachedData)
+        } else {
+            // If cell is not in loading state, start loading
+            cell.configure(with: photo)
+            if !self.loadingCells.contains(indexPath) {
+                self.loadImages(for: [indexPath])
+            }
+        }
         
         return cell
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        print("Selected cell at index path: \(indexPath)")
     }
 }
 
@@ -147,7 +238,6 @@ extension PhotoListViewController: UITableViewDelegate {
         let offsetY = scrollView.contentOffset.y
         let contentHeight = scrollView.contentSize.height
         let height = scrollView.frame.size.height
-        print("offsetY: \(offsetY), contentHeight: \(contentHeight), height: \(height)")
         if offsetY > contentHeight - height * 2 {
             guard !self.viewModel.isLoading.value, !self.isLoadingMore else { return }
             self.isLoadingMore = true
@@ -164,5 +254,24 @@ extension PhotoListViewController: UISearchBarDelegate {
     
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         searchBar.resignFirstResponder()
+    }
+}
+
+// MARK: - UITableViewDataSourcePrefetching
+extension PhotoListViewController: UITableViewDataSourcePrefetching {
+    func tableView(_ tableView: UITableView, prefetchRowsAt indexPaths: [IndexPath]) {
+        print("Prefetching images for index paths: \(indexPaths)")
+        self.loadImages(for: indexPaths)
+    }
+    
+    func tableView(_ tableView: UITableView, cancelPrefetchingForRowsAt indexPaths: [IndexPath]) {
+        print("Calcel Prefetching images for index paths: \(indexPaths)")
+        for indexPath in indexPaths {
+            if let task = self.imageLoadTasks[indexPath] {
+                task.cancel()
+                self.imageLoadTasks.removeValue(forKey: indexPath)
+                self.loadingCells.remove(indexPath)
+            }
+        }
     }
 }

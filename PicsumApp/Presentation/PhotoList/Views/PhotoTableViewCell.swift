@@ -44,7 +44,6 @@ final class PhotoTableViewCell: UITableViewCell {
     }()
     
     // MARK: - Properties
-    private var imageDataTask: URLSessionDataTask?
     private var aspectRatioConstraint: NSLayoutConstraint?
     
     // MARK: - Initialization
@@ -59,7 +58,6 @@ final class PhotoTableViewCell: UITableViewCell {
     
     override func prepareForReuse() {
         super.prepareForReuse()
-        self.imageDataTask?.cancel()
         self.photoImageView.image = nil
         self.authorLabel.text = nil
         self.sizeLabel.text = nil
@@ -94,34 +92,31 @@ final class PhotoTableViewCell: UITableViewCell {
     
     // MARK: - Configuration
     func configure(with photo: Photo) {
-        self.authorLabel.text = photo.author
+        self.authorLabel.text = "\(photo.author) - ID: \(photo.id)"
         
         if photo.isHighResolution {
             self.sizeLabel.text = "Size: Original(\(photo.sizeText)) - Optimized(\(photo.optimizedSizeText))"
         } else {
             self.sizeLabel.text = "Size: \(photo.sizeText)"
         }
-
+        
         self.aspectRatioConstraint?.isActive = false
+    
         self.aspectRatioConstraint = self.photoImageView.heightAnchor.constraint(equalTo: self.photoImageView.widthAnchor, multiplier: photo.aspectRatio)
+        self.aspectRatioConstraint?.priority = .defaultHigh
         self.aspectRatioConstraint?.isActive = true
         
-        self.loadImage(from: photo.optimizedImageURL)
-    }
-    
-    private func loadImage(from url: URL) {
-        self.loadingIndicator.startAnimating()
-        
-        self.imageDataTask = URLSession.shared.dataTask(with: url) { [weak self] data, response, error in
-            DispatchQueue.main.async {
-                self?.loadingIndicator.stopAnimating()
-                
-                if let data = data, let image = UIImage(data: data) {
-                    self?.photoImageView.image = image
-                }
-            }
+        // Only clear image and show loading if we don't have an image
+        if self.photoImageView.image == nil {
+            self.loadingIndicator.startAnimating()
         }
         
-        self.imageDataTask?.resume()
+    }
+    
+    func setImage(data: Data) {
+        if let image = UIImage(data: data) {
+            self.photoImageView.image = image
+            self.loadingIndicator.stopAnimating()
+        }
     }
 } 
