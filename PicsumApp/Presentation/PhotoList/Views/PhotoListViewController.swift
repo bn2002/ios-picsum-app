@@ -40,7 +40,6 @@ final class PhotoListViewController: UIViewController {
     private var viewModel: PhotoListViewModel
     private var isLoadingMore = false
     private var imageLoadTasks: ThreadSafeDictionary<IndexPath, String> = ThreadSafeDictionary()
-    private var imageLoad: [IndexPath: Data] = [:]
     private var loadingCells: Set<IndexPath> = []
     private var didPreloadInitialImages = false
     private var scrollTimer: Timer?
@@ -136,26 +135,13 @@ final class PhotoListViewController: UIViewController {
         for indexPath in indexPaths {
             guard indexPath.row < self.viewModel.photos.value.count else { continue }
             let photo = self.viewModel.photos.value[indexPath.row]
-            
-            // Check cache
-            guard self.imageLoad[indexPath] == nil else {
-                DispatchQueue.main.async {
-                    if let cell = self.tableView.cellForRow(at: indexPath) as? PhotoTableViewCell,
-                       let data = self.imageLoad[indexPath] {
-                        cell.configure(with: photo)
-                        cell.setImage(data: data)
-                    }
-                }
-                continue
-            }
-            
+                        
             // Mark cell as loading
             self.loadingCells.insert(indexPath)
             let taskId = ImageLoader.shared.loadImage(from: photo.optimizedImageURL) { [weak self] image in
                 guard let `self` = self else { return }
                 self.loadingCells.remove(indexPath)
                 if let image = image {
-                   self.imageLoad[indexPath] = image
                    if let cell = self.tableView.cellForRow(at: indexPath) as? PhotoTableViewCell {
                        cell.configure(with: photo)
                        cell.setImage(data: image)
@@ -206,12 +192,6 @@ extension PhotoListViewController: UITableViewDataSource {
         
         let photo = self.viewModel.photos.value[indexPath.row]
         cell.configure(with: photo)
-        
-        // If we have cached image data, show image
-        if let cachedData = self.imageLoad[indexPath] {
-            cell.setImage(data: cachedData)
-        }
-        
         return cell
     }
     

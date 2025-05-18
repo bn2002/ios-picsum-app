@@ -11,6 +11,7 @@ final class ImageLoader {
     static let shared = ImageLoader()
     private let operationQueue: OperationQueue
     private let operations: ThreadSafeDictionary<String, ImageLoaderOperation> = ThreadSafeDictionary()
+    private let cacheManager = ImageCacheManager.shared
     
     private init() {
         self.operationQueue = OperationQueue()
@@ -21,10 +22,25 @@ final class ImageLoader {
     
     func loadImage(from url: URL, completion: @escaping (Data?) -> Void) -> String {
         let taskId = UUID().uuidString
-        let operation = ImageLoaderOperation(url: url) { image in
+        
+        if let cachedData = cacheManager.getImage(for: url) {
+            completion(cachedData)
+            return UUID().uuidString
+        }
+        
+        let operation = ImageLoaderOperation(url: url) { [weak self] image in
+            guard let `self` = self else { return }
+
             DispatchQueue.main.async {
                 completion(image)
             }
+            
+            DispatchQueue.global().async {
+                if let data = image {
+                    self.cacheManager.setImage(data, for: url)
+                }
+            }
+            self.removeOperation(for: taskId)
         }
         
         self.addOperation(operation, for: taskId)

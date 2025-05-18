@@ -30,6 +30,9 @@
 		44F41B472DD9B4A70040A64A /* Collection+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44F41B462DD9B49E0040A64A /* Collection+Extensions.swift */; };
 		44F41B492DDA07CE0040A64A /* ImageLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44F41B482DDA07C90040A64A /* ImageLoader.swift */; };
 		44F41B4B2DDA1BF50040A64A /* ThreadSafeDictionary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44F41B4A2DDA1BF30040A64A /* ThreadSafeDictionary.swift */; };
+		44F41B4E2DDA4B310040A64A /* ImageCacheProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44F41B4D2DDA4B270040A64A /* ImageCacheProtocol.swift */; };
+		44F41B502DDA4BDA0040A64A /* MemoryImageCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44F41B4F2DDA4BC90040A64A /* MemoryImageCache.swift */; };
+		44F41B522DDA4DFF0040A64A /* ImageCacheManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44F41B512DDA4DFD0040A64A /* ImageCacheManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -77,6 +80,9 @@
 		44F41B462DD9B49E0040A64A /* Collection+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Collection+Extensions.swift"; sourceTree = "<group>"; };
 		44F41B482DDA07C90040A64A /* ImageLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageLoader.swift; sourceTree = "<group>"; };
 		44F41B4A2DDA1BF30040A64A /* ThreadSafeDictionary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreadSafeDictionary.swift; sourceTree = "<group>"; };
+		44F41B4D2DDA4B270040A64A /* ImageCacheProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageCacheProtocol.swift; sourceTree = "<group>"; };
+		44F41B4F2DDA4BC90040A64A /* MemoryImageCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryImageCache.swift; sourceTree = "<group>"; };
+		44F41B512DDA4DFD0040A64A /* ImageCacheManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageCacheManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -127,6 +133,7 @@
 		447B7C3D2DD85753006A4E64 /* PicsumApp */ = {
 			isa = PBXGroup;
 			children = (
+				44F41B4C2DDA49750040A64A /* Cache */,
 				44F41B452DD9B4100040A64A /* Extensions */,
 				44E27EBB2DD8EB6200D716A7 /* Utils */,
 				447B7C5C2DD85CFF006A4E64 /* Presentation */,
@@ -281,6 +288,16 @@
 			path = Extensions;
 			sourceTree = "<group>";
 		};
+		44F41B4C2DDA49750040A64A /* Cache */ = {
+			isa = PBXGroup;
+			children = (
+				44F41B512DDA4DFD0040A64A /* ImageCacheManager.swift */,
+				44F41B4F2DDA4BC90040A64A /* MemoryImageCache.swift */,
+				44F41B4D2DDA4B270040A64A /* ImageCacheProtocol.swift */,
+			);
+			path = Cache;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -423,8 +440,11 @@
 				44F41B3F2DD97FD10040A64A /* Photo+Extensions.swift in Sources */,
 				447B7C572DD85C90006A4E64 /* SearchPhotosUseCase.swift in Sources */,
 				44F41B4B2DDA1BF50040A64A /* ThreadSafeDictionary.swift in Sources */,
+				44F41B502DDA4BDA0040A64A /* MemoryImageCache.swift in Sources */,
 				447B7C3E2DD85753006A4E64 /* AppDelegate.swift in Sources */,
 				44F41B442DD9972C0040A64A /* Constants.swift in Sources */,
+				44F41B522DDA4DFF0040A64A /* ImageCacheManager.swift in Sources */,
+				44F41B4E2DDA4B310040A64A /* ImageCacheProtocol.swift in Sources */,
 				44E27EBD2DD8EB6D00D716A7 /* Observable.swift in Sources */,
 				447B7C662DD85E8E006A4E64 /* PhotoRepositoryProtocol.swift in Sources */,
 				44F41B412DD97FFD0040A64A /* UIScreen+Extensions.swift in Sources */,

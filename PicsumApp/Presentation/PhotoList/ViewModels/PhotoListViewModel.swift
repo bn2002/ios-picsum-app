@@ -87,13 +87,15 @@ final class DefaultPhotoListViewModel: PhotoListViewModel {
             
             switch result {
             case .success(let newPhotos):
-                if self.currentPage == 1 {
-                    self.allPhotos = newPhotos
-                } else {
-                    self.allPhotos.append(contentsOf: newPhotos)
+                if newPhotos.count > 0 {
+                    if self.currentPage == 1 {
+                        self.allPhotos = newPhotos
+                    } else {
+                        self.allPhotos.append(contentsOf: newPhotos)
+                    }
+                    
+                    self.photos.value = self.allPhotos
                 }
-                
-                self.photos.value = self.allPhotos
                 self.error.value = nil
                 
             case .failure(let error):
