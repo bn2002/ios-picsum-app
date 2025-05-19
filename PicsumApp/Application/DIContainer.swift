@@ -31,6 +31,10 @@ final class DIContainer {
         return SearchPhotosUseCase()
     }()
     
+    lazy var coreDataStack: CoreDataStack = {
+        return CoreDataStack()
+    }()
+    
     // MARK: - ViewModels
     func makePhotoListViewModel() -> PhotoListViewModel {
         return DefaultPhotoListViewModel(
@@ -43,5 +47,24 @@ final class DIContainer {
     func makePhotoListViewController() -> PhotoListViewController {
         let viewModel = makePhotoListViewModel()
         return PhotoListViewController(viewModel: viewModel)
+    }
+    
+    func makeLaunchViewController() -> LaunchViewController {
+            return LaunchViewController(viewModel: makeLaunchViewModel())
+    }
+    
+    func makeLaunchViewModel() -> LaunchViewModel {
+            return LaunchViewModel(initializeUseCase: makeInitializePhotosUseCase())
+    }
+    
+    func makePhotoStorageRepository() -> PhotoStorageRepositoryProtocol {
+        return CoreDataPhotoStorageRepository(coreDataStack: coreDataStack)
+    }
+        
+    func makeInitializePhotosUseCase() -> InitializePhotosUseCaseProtocol {
+        return InitializePhotosUseCase(
+            photoRepository: photoRepository,
+            storageRepository: makePhotoStorageRepository()
+        )
     }
 }

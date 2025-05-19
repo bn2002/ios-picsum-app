@@ -37,6 +37,13 @@
 		44F949EF2DDAE3DA00FF4E7E /* UISearchBar+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44F949EE2DDAE3D400FF4E7E /* UISearchBar+Extensions.swift */; };
 		44F949F12DDAE7C300FF4E7E /* String+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44F949F02DDAE7BD00FF4E7E /* String+Extensions.swift */; };
 		44F949F32DDB0B3B00FF4E7E /* SearchTextValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44F949F22DDB0B3900FF4E7E /* SearchTextValidator.swift */; };
+		44F949F52DDB254B00FF4E7E /* InitializePhotosUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44F949F42DDB254A00FF4E7E /* InitializePhotosUseCase.swift */; };
+		44F949F72DDB25D000FF4E7E /* PhotoStorageRepositoryProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44F949F62DDB25CF00FF4E7E /* PhotoStorageRepositoryProtocol.swift */; };
+		44F949FE2DDB2EDD00FF4E7E /* LaunchViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44F949FD2DDB2EDC00FF4E7E /* LaunchViewModel.swift */; };
+		44F94A002DDB2F3200FF4E7E /* LaunchViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44F949FF2DDB2F3100FF4E7E /* LaunchViewController.swift */; };
+		44F94A032DDB313F00FF4E7E /* CoreDataPhotoStorageRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44F94A022DDB313E00FF4E7E /* CoreDataPhotoStorageRepository.swift */; };
+		44F94A062DDB317200FF4E7E /* CoreDataStack.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44F94A052DDB317100FF4E7E /* CoreDataStack.swift */; };
+		44F94A092DDB31BB00FF4E7E /* Model.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 44F94A072DDB31BB00FF4E7E /* Model.xcdatamodeld */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -91,6 +98,13 @@
 		44F949EE2DDAE3D400FF4E7E /* UISearchBar+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UISearchBar+Extensions.swift"; sourceTree = "<group>"; };
 		44F949F02DDAE7BD00FF4E7E /* String+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Extensions.swift"; sourceTree = "<group>"; };
 		44F949F22DDB0B3900FF4E7E /* SearchTextValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchTextValidator.swift; sourceTree = "<group>"; };
+		44F949F42DDB254A00FF4E7E /* InitializePhotosUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InitializePhotosUseCase.swift; sourceTree = "<group>"; };
+		44F949F62DDB25CF00FF4E7E /* PhotoStorageRepositoryProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoStorageRepositoryProtocol.swift; sourceTree = "<group>"; };
+		44F949FD2DDB2EDC00FF4E7E /* LaunchViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchViewModel.swift; sourceTree = "<group>"; };
+		44F949FF2DDB2F3100FF4E7E /* LaunchViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchViewController.swift; sourceTree = "<group>"; };
+		44F94A022DDB313E00FF4E7E /* CoreDataPhotoStorageRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataPhotoStorageRepository.swift; sourceTree = "<group>"; };
+		44F94A052DDB317100FF4E7E /* CoreDataStack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataStack.swift; sourceTree = "<group>"; };
+		44F94A082DDB31BB00FF4E7E /* Model.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Model.xcdatamodel; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -203,6 +217,7 @@
 		447B7C532DD85C80006A4E64 /* UseCases */ = {
 			isa = PBXGroup;
 			children = (
+				44F949F42DDB254A00FF4E7E /* InitializePhotosUseCase.swift */,
 				447B7C562DD85C8F006A4E64 /* SearchPhotosUseCase.swift */,
 				447B7C542DD85C88006A4E64 /* FetchPhotosUseCase.swift */,
 			);
@@ -212,6 +227,7 @@
 		447B7C582DD85C9A006A4E64 /* Data */ = {
 			isa = PBXGroup;
 			children = (
+				44F94A012DDB313300FF4E7E /* Storage */,
 				447B7C642DD85E69006A4E64 /* Repositories */,
 				447B7C592DD85CA2006A4E64 /* Network */,
 			);
@@ -230,6 +246,7 @@
 		447B7C5C2DD85CFF006A4E64 /* Presentation */ = {
 			isa = PBXGroup;
 			children = (
+				44F949F82DDB2EB500FF4E7E /* Launch */,
 				447B7C5D2DD85D0A006A4E64 /* PhotoList */,
 			);
 			path = Presentation;
@@ -264,8 +281,9 @@
 		447B7C642DD85E69006A4E64 /* Repositories */ = {
 			isa = PBXGroup;
 			children = (
+				44F94A0E2DDB375000FF4E7E /* Protocol */,
 				447B7C672DD85E9E006A4E64 /* APIPhotoRepository.swift */,
-				447B7C652DD85E8A006A4E64 /* PhotoRepositoryProtocol.swift */,
+				44F94A022DDB313E00FF4E7E /* CoreDataPhotoStorageRepository.swift */,
 			);
 			path = Repositories;
 			sourceTree = "<group>";
@@ -308,6 +326,57 @@
 				44F41B4D2DDA4B270040A64A /* ImageCacheProtocol.swift */,
 			);
 			path = Cache;
+			sourceTree = "<group>";
+		};
+		44F949F82DDB2EB500FF4E7E /* Launch */ = {
+			isa = PBXGroup;
+			children = (
+				44F949FC2DDB2ED500FF4E7E /* ViewModels */,
+				44F949FB2DDB2ED100FF4E7E /* View */,
+			);
+			path = Launch;
+			sourceTree = "<group>";
+		};
+		44F949FB2DDB2ED100FF4E7E /* View */ = {
+			isa = PBXGroup;
+			children = (
+				44F949FF2DDB2F3100FF4E7E /* LaunchViewController.swift */,
+			);
+			path = View;
+			sourceTree = "<group>";
+		};
+		44F949FC2DDB2ED500FF4E7E /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				44F949FD2DDB2EDC00FF4E7E /* LaunchViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		44F94A012DDB313300FF4E7E /* Storage */ = {
+			isa = PBXGroup;
+			children = (
+				44F94A042DDB316B00FF4E7E /* CoreData */,
+			);
+			path = Storage;
+			sourceTree = "<group>";
+		};
+		44F94A042DDB316B00FF4E7E /* CoreData */ = {
+			isa = PBXGroup;
+			children = (
+				44F94A052DDB317100FF4E7E /* CoreDataStack.swift */,
+				44F94A072DDB31BB00FF4E7E /* Model.xcdatamodeld */,
+			);
+			path = CoreData;
+			sourceTree = "<group>";
+		};
+		44F94A0E2DDB375000FF4E7E /* Protocol */ = {
+			isa = PBXGroup;
+			children = (
+				447B7C652DD85E8A006A4E64 /* PhotoRepositoryProtocol.swift */,
+				44F949F62DDB25CF00FF4E7E /* PhotoStorageRepositoryProtocol.swift */,
+			);
+			path = Protocol;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -456,18 +525,25 @@
 				44F41B4B2DDA1BF50040A64A /* ThreadSafeDictionary.swift in Sources */,
 				44F41B502DDA4BDA0040A64A /* MemoryImageCache.swift in Sources */,
 				447B7C3E2DD85753006A4E64 /* AppDelegate.swift in Sources */,
+				44F94A062DDB317200FF4E7E /* CoreDataStack.swift in Sources */,
 				44F41B442DD9972C0040A64A /* Constants.swift in Sources */,
 				44F41B522DDA4DFF0040A64A /* ImageCacheManager.swift in Sources */,
+				44F94A002DDB2F3200FF4E7E /* LaunchViewController.swift in Sources */,
 				44F41B4E2DDA4B310040A64A /* ImageCacheProtocol.swift in Sources */,
 				44F949F32DDB0B3B00FF4E7E /* SearchTextValidator.swift in Sources */,
 				44E27EBD2DD8EB6D00D716A7 /* Observable.swift in Sources */,
+				44F949F52DDB254B00FF4E7E /* InitializePhotosUseCase.swift in Sources */,
 				44F41B542DDA57970040A64A /* DiskImageCache.swift in Sources */,
+				44F949F72DDB25D000FF4E7E /* PhotoStorageRepositoryProtocol.swift in Sources */,
 				447B7C662DD85E8E006A4E64 /* PhotoRepositoryProtocol.swift in Sources */,
 				44F41B412DD97FFD0040A64A /* UIScreen+Extensions.swift in Sources */,
 				44F41B472DD9B4A70040A64A /* Collection+Extensions.swift in Sources */,
 				447B7C632DD85D35006A4E64 /* PhotoListViewModel.swift in Sources */,
 				44F41B492DDA07CE0040A64A /* ImageLoader.swift in Sources */,
 				447B7C612DD85D2D006A4E64 /* PhotoListViewController.swift in Sources */,
+				44F949FE2DDB2EDD00FF4E7E /* LaunchViewModel.swift in Sources */,
+				44F94A032DDB313F00FF4E7E /* CoreDataPhotoStorageRepository.swift in Sources */,
+				44F94A092DDB31BB00FF4E7E /* Model.xcdatamodeld in Sources */,
 				447B7C4E2DD85806006A4E64 /* DIContainer.swift in Sources */,
 				44F41B3D2DD97C250040A64A /* PhotoTableViewCell.swift in Sources */,
 				447B7C682DD85E9F006A4E64 /* APIPhotoRepository.swift in Sources */,
@@ -806,6 +882,19 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCVersionGroup section */
+		44F94A072DDB31BB00FF4E7E /* Model.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				44F94A082DDB31BB00FF4E7E /* Model.xcdatamodel */,
+			);
+			currentVersion = 44F94A082DDB31BB00FF4E7E /* Model.xcdatamodel */;
+			path = Model.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
+/* End XCVersionGroup section */
 	};
 	rootObject = 447B7BAF2DD8336A006A4E64 /* Project object */;
 }
