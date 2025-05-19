@@ -34,6 +34,9 @@
 		44F41B502DDA4BDA0040A64A /* MemoryImageCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44F41B4F2DDA4BC90040A64A /* MemoryImageCache.swift */; };
 		44F41B522DDA4DFF0040A64A /* ImageCacheManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44F41B512DDA4DFD0040A64A /* ImageCacheManager.swift */; };
 		44F41B542DDA57970040A64A /* DiskImageCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44F41B532DDA57910040A64A /* DiskImageCache.swift */; };
+		44F949EF2DDAE3DA00FF4E7E /* UISearchBar+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44F949EE2DDAE3D400FF4E7E /* UISearchBar+Extensions.swift */; };
+		44F949F12DDAE7C300FF4E7E /* String+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44F949F02DDAE7BD00FF4E7E /* String+Extensions.swift */; };
+		44F949F32DDB0B3B00FF4E7E /* SearchTextValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44F949F22DDB0B3900FF4E7E /* SearchTextValidator.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -85,6 +88,9 @@
 		44F41B4F2DDA4BC90040A64A /* MemoryImageCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryImageCache.swift; sourceTree = "<group>"; };
 		44F41B512DDA4DFD0040A64A /* ImageCacheManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageCacheManager.swift; sourceTree = "<group>"; };
 		44F41B532DDA57910040A64A /* DiskImageCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiskImageCache.swift; sourceTree = "<group>"; };
+		44F949EE2DDAE3D400FF4E7E /* UISearchBar+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UISearchBar+Extensions.swift"; sourceTree = "<group>"; };
+		44F949F02DDAE7BD00FF4E7E /* String+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Extensions.swift"; sourceTree = "<group>"; };
+		44F949F22DDB0B3900FF4E7E /* SearchTextValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchTextValidator.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -267,6 +273,7 @@
 		44E27EBB2DD8EB6200D716A7 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
+				44F949F22DDB0B3900FF4E7E /* SearchTextValidator.swift */,
 				44F41B4A2DDA1BF30040A64A /* ThreadSafeDictionary.swift */,
 				44E27EBC2DD8EB6C00D716A7 /* Observable.swift */,
 			);
@@ -284,6 +291,8 @@
 		44F41B452DD9B4100040A64A /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
+				44F949F02DDAE7BD00FF4E7E /* String+Extensions.swift */,
+				44F949EE2DDAE3D400FF4E7E /* UISearchBar+Extensions.swift */,
 				44F41B462DD9B49E0040A64A /* Collection+Extensions.swift */,
 				44F41B402DD97FFD0040A64A /* UIScreen+Extensions.swift */,
 			);
@@ -439,8 +448,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				447B7C522DD8593D006A4E64 /* Photo.swift in Sources */,
+				44F949EF2DDAE3DA00FF4E7E /* UISearchBar+Extensions.swift in Sources */,
 				447B7C552DD85C89006A4E64 /* FetchPhotosUseCase.swift in Sources */,
 				44F41B3F2DD97FD10040A64A /* Photo+Extensions.swift in Sources */,
+				44F949F12DDAE7C300FF4E7E /* String+Extensions.swift in Sources */,
 				447B7C572DD85C90006A4E64 /* SearchPhotosUseCase.swift in Sources */,
 				44F41B4B2DDA1BF50040A64A /* ThreadSafeDictionary.swift in Sources */,
 				44F41B502DDA4BDA0040A64A /* MemoryImageCache.swift in Sources */,
@@ -448,6 +459,7 @@
 				44F41B442DD9972C0040A64A /* Constants.swift in Sources */,
 				44F41B522DDA4DFF0040A64A /* ImageCacheManager.swift in Sources */,
 				44F41B4E2DDA4B310040A64A /* ImageCacheProtocol.swift in Sources */,
+				44F949F32DDB0B3B00FF4E7E /* SearchTextValidator.swift in Sources */,
 				44E27EBD2DD8EB6D00D716A7 /* Observable.swift in Sources */,
 				44F41B542DDA57970040A64A /* DiskImageCache.swift in Sources */,
 				447B7C662DD85E8E006A4E64 /* PhotoRepositoryProtocol.swift in Sources */,

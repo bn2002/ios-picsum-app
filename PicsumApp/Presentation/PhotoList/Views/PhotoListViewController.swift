@@ -40,7 +40,6 @@ final class PhotoListViewController: UIViewController {
     private var viewModel: PhotoListViewModel
     private var isLoadingMore = false
     private var imageLoadTasks: ThreadSafeDictionary<IndexPath, String> = ThreadSafeDictionary()
-    private var loadingCells: Set<IndexPath> = []
     private var didPreloadInitialImages = false
     private var scrollTimer: Timer?
     private let scrollStopDelay: TimeInterval = 0.1
@@ -158,10 +157,8 @@ final class PhotoListViewController: UIViewController {
             let photo = self.viewModel.photos.value[indexPath.row]
                         
             // Mark cell as loading
-            self.loadingCells.insert(indexPath)
             let taskId = ImageLoader.shared.loadImage(from: photo.optimizedImageURL) { [weak self] image in
                 guard let `self` = self else { return }
-                self.loadingCells.remove(indexPath)
                 if let image = image {
                    if let cell = self.tableView.cellForRow(at: indexPath) as? PhotoTableViewCell {
                        cell.configure(with: photo)
@@ -233,17 +230,6 @@ extension PhotoListViewController: UITableViewDelegate {
     }
 }
 
-// MARK: - UISearchBarDelegate
-extension PhotoListViewController: UISearchBarDelegate {
-    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        self.viewModel.search(query: searchText)
-    }
-    
-    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-        searchBar.resignFirstResponder()
-    }
-}
-
 // MARK: - UIScrollViewDelegate
 extension PhotoListViewController: UIScrollViewDelegate {
     func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
@@ -289,5 +275,47 @@ extension PhotoListViewController: UIScrollViewDelegate {
            .map { IndexPath(item: $0, section: 0) }
 
         return nextItems
+    }
+}
+
+// MARK: - UISearchBarDelegate
+extension PhotoListViewController: UISearchBarDelegate {
+    func searchBar(_ searchBar: UISearchBar, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
+        let current = searchBar.text ?? ""
+        
+        guard let rangeInString = Range(range, in: current) else { return false }
+        let updated = current.replacingCharacters(in: rangeInString, with: text)
+        
+        let cleanedText = SearchTextValidator.shared.cleanSearchText(updated)
+        let maxLength = SearchTextValidator.shared.maxLength
+        
+        if cleanedText.count > maxLength {
+            let truncated = String(cleanedText.prefix(maxLength))
+            searchBar.text = truncated
+            // Move cursor to the end
+            DispatchQueue.main.async {
+                let endPosition = searchBar.textField.endOfDocument
+                searchBar.textField.selectedTextRange = searchBar.textField.textRange(from: endPosition, to: endPosition)
+            }
+
+            return false
+        }
+        
+        if cleanedText != updated {
+            searchBar.text = cleanedText
+            return false
+        }
+        
+        return true
+    }
+    
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        var searchText = SearchTextValidator.shared.cleanSearchText(searchText)
+        searchBar.text = searchText
+        self.viewModel.search(query: searchText)
+    }
+    
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        searchBar.resignFirstResponder()
     }
 }
