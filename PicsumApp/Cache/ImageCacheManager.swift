@@ -11,6 +11,7 @@ final class ImageCacheManager {
     static let shared = ImageCacheManager()
     
     private let cacheProviders: [ImageCacheProtocol]
+    private let queue = DispatchQueue(label: "com.bn2002.picsum.cacheManager", attributes: .concurrent)
     
     private init() {
         self.cacheProviders = [
@@ -21,14 +22,31 @@ final class ImageCacheManager {
     
     func getImage(for url: URL) -> Data? {
         let key = url.absoluteString
-        for provider in self.cacheProviders {
+        for (index, provider) in self.cacheProviders.enumerated() {
             if let image = provider.getImage(for: key) {
                 print("\(provider.identifier) Hit Cache: \(key)")
+                if index > 0 {
+                    self.promoteToHigherPriorityCaches(data: image, key: key, fromIndex: index)
+                }
                 return image
             }
         }
         print("Miss cache: \(key)")
         return nil
+    }
+    
+    private func promoteToHigherPriorityCaches(data: Data, key: String, fromIndex: Int) {
+        queue.async { [weak self] in
+            guard let self = self else { return }
+            
+            // Promote to higher priority caches
+            for index in 0..<fromIndex {
+                let provider = self.cacheProviders[index]
+                print("Promoting to \(provider.identifier): \(key)")
+                provider.setImage(data, for: key)
+                return
+            }
+        }
     }
     
     func setImage(_ image: Data, for url: URL) {
