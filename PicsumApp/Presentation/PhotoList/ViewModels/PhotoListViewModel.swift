@@ -18,6 +18,7 @@ protocol PhotoListViewModelOutput {
     var photos: Observable<[Photo]> { get }
     var isLoading: Observable<Bool> { get }
     var error: Observable<Error?> { get }
+    var currentPage: Int { get }
 }
 
 protocol PhotoListViewModel: PhotoListViewModelInput, PhotoListViewModelOutput {}
@@ -31,7 +32,7 @@ final class DefaultPhotoListViewModel: PhotoListViewModel {
     // MARK: - Private Properties
     private let fetchPhotosUseCase: FetchPhotosUseCaseProtocol
     private let searchPhotosUseCase: SearchPhotosUseCaseProtocol
-    private var currentPage = 1
+    private(set) var currentPage = 1
     private let itemsPerPage = 100
     private var allPhotos: [Photo] = []
     private var currentTask: URLSessionDataTask?
@@ -87,15 +88,19 @@ final class DefaultPhotoListViewModel: PhotoListViewModel {
             
             switch result {
             case .success(let newPhotos):
-                if newPhotos.count > 0 {
-                    if self.currentPage == 1 {
-                        self.allPhotos = newPhotos
-                    } else {
-                        self.allPhotos.append(contentsOf: newPhotos)
-                    }
-                    
-                    self.photos.value = self.allPhotos
+                if newPhotos.isEmpty {
+                    self.currentPage = max(1, self.currentPage - 1)
+                    self.error.value = nil
+                    return
                 }
+                
+                if self.currentPage == 1 {
+                    self.allPhotos = newPhotos
+                } else {
+                    self.allPhotos.append(contentsOf: newPhotos)
+                }
+                
+                self.photos.value = self.allPhotos
                 self.error.value = nil
                 
             case .failure(let error):

@@ -91,14 +91,19 @@ final class PhotoListViewController: UIViewController {
     private func setupBindings() {
         self.viewModel.photos.observe(on: self) { [weak self] photos in
             guard let `self` = self else { return }
-            self.tableView.reloadData()
-            
-            // Call only once when photos are loaded(initial images)
-            if !self.didPreloadInitialImages && !photos.isEmpty {
-                DispatchQueue.main.async {
-                    self.didPreloadInitialImages = true
-                    self.preloadImagesForVisibleCells()
+            // Reload table view data if first page
+            if self.viewModel.currentPage == 1 {
+                self.tableView.reloadData()
+                
+                // Call only once when photos are loaded(initial images)
+                if !self.didPreloadInitialImages && !photos.isEmpty {
+                    DispatchQueue.main.async {
+                        self.didPreloadInitialImages = true
+                        self.preloadImagesForVisibleCells()
+                    }
                 }
+            } else {
+                self.handleLoadMoreUpdate(with: photos)
             }
         }
         
@@ -116,6 +121,22 @@ final class PhotoListViewController: UIViewController {
                 self.loadingIndicator.stopAnimating()
                 self.refreshControl.endRefreshing()
                 self.isLoadingMore = false
+            }
+        }
+    }
+    
+    private func handleLoadMoreUpdate(with newPhotos: [Photo]) {
+        DispatchQueue.main.async {
+            
+            let previousCount = self.tableView.numberOfRows(inSection: 0)
+            let newCount = newPhotos.count
+            
+            guard newCount > previousCount else { return }
+            
+            let indexPaths = (previousCount..<newCount).map { IndexPath(row: $0, section: 0) }
+            
+            self.tableView.performBatchUpdates {
+                self.tableView.insertRows(at: indexPaths, with: .none)
             }
         }
     }
@@ -162,6 +183,7 @@ final class PhotoListViewController: UIViewController {
     
     // MARK: - Actions
     @objc private func handleRefresh() {
+        self.didPreloadInitialImages = false
         self.viewModel.refresh()
     }
     
