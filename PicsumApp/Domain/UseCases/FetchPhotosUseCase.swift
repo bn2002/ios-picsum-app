@@ -7,21 +7,33 @@
 
 import Foundation
 
+
 protocol FetchPhotosUseCaseProtocol {
-    @discardableResult
-    func execute(page: Int, limit: Int, completion: @escaping (Result<[Photo], Error>) -> Void) -> URLSessionDataTask?
+    func execute(page: Int, limit: Int, completion: @escaping (Result<[Photo], Error>) -> Void)
 }
 
 final class FetchPhotosUseCase: FetchPhotosUseCaseProtocol {
-    private let repository: PhotoRepositoryProtocol
+    private let photoRepository: PhotoRepositoryProtocol
+    private let storageRepository: PhotoStorageRepositoryProtocol
     
-    init(repository: PhotoRepositoryProtocol) {
-        self.repository = repository
+    init(
+        repository: PhotoRepositoryProtocol,
+        storageRepository: PhotoStorageRepositoryProtocol
+    ) {
+        self.photoRepository = repository
+        self.storageRepository = storageRepository
     }
     
-    @discardableResult
-    func execute(page: Int, limit: Int, completion: @escaping (Result<[Photo], any Error>) -> Void) -> URLSessionDataTask? {
-        return repository.fetchPhotos(page: page, limit: limit, completion: completion)
+    func execute(page: Int, limit: Int, completion: @escaping (Result<[Photo], any Error>) -> Void) {
+        storageRepository.fetchPhotos(page: page, limit: limit) { result in
+                    switch result {
+                    case .success(let photos):
+                        completion(.success(photos))
+                    case .failure:
+                        completion(.failure(StorageError.invalidData))
+                        print("Local fetch failed")
+                    }
+        }
     }
 
 }

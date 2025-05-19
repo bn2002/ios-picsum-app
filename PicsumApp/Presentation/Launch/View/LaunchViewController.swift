@@ -136,15 +136,13 @@ final class LaunchViewController: UIViewController {
     
     private func navigateToMain() {
         // Transition to main screen
-        let mainVC = PhotoListViewController(viewModel: DIContainer.shared.makePhotoListViewModel())
-        let navController = UINavigationController(rootViewController: mainVC)
-        
+        let mainVC = DIContainer.shared.makePhotoListViewController()
         // Set as root view controller with fade transition
         UIView.transition(with: UIApplication.shared.windows.first!,
                          duration: 0.3,
                          options: .transitionCrossDissolve,
                          animations: {
-            UIApplication.shared.windows.first?.rootViewController = navController
+            UIApplication.shared.windows.first?.rootViewController = mainVC
         })
     }
     

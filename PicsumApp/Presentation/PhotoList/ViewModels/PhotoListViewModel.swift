@@ -35,7 +35,6 @@ final class DefaultPhotoListViewModel: PhotoListViewModel {
     private(set) var currentPage = 1
     private let itemsPerPage = 100
     private var allPhotos: [Photo] = []
-    private var currentTask: URLSessionDataTask?
     
     // MARK: - Init
     init(fetchPhotosUseCase: FetchPhotosUseCaseProtocol,
@@ -69,15 +68,20 @@ final class DefaultPhotoListViewModel: PhotoListViewModel {
     private func loadPhotos() {
         self.isLoading.value = true
         
-        self.currentTask?.cancel()
-        
-        self.currentTask = fetchPhotosUseCase.execute(
-            page: currentPage,
-            limit: itemsPerPage
-        ) { [weak self] (result: Result<[Photo], Error>) in
-            guard let `self` = self else { return }
-            self.handlePhotosResult(result)
-        }
+        fetchPhotosUseCase.execute(
+           page: currentPage,
+           limit: itemsPerPage
+        ) { [weak self] result in
+                   guard let `self` = self else { return }
+                   
+                   switch result {
+                   case .success(let newPhotos):
+                       self.handlePhotosResult(.success(newPhotos))
+                       
+                   case .failure(let error):
+                       self.handlePhotosResult(.failure(error))
+                   }
+            }
     }
     
     private func handlePhotosResult(_ result: Result<[Photo], Error>) {

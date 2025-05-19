@@ -21,7 +21,11 @@ protocol PhotoStorageRepositoryProtocol {
     func savePhotos(_ photos: [Photo], completion: @escaping (Result<Void, StorageError>) -> Void)
     
     // Fetch photo from storage
-    func fetchPhotos(completion: @escaping (Result<[Photo], StorageError>) -> Void)
+    func fetchPhotos(
+        page: Int,
+        limit: Int,
+        completion: @escaping (Result<[Photo], StorageError>) -> Void
+    )
     
     // Remove all photos from storage
     func clearAll(completion: @escaping (Result<Void, StorageError>) -> Void)

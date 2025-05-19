@@ -37,12 +37,12 @@ final class CoreDataPhotoStorageRepository: PhotoStorageRepositoryProtocol {
                 // Insert new data
                 photos.forEach { photo in
                     let entity = PhotoEntity(context: context)
-                    entity.id = photo.id
+                    entity.id = Int32(photo.id) ?? 0
                     entity.author = photo.author
                     entity.width = Int32(photo.width)
                     entity.height = Int32(photo.height)
-                    entity.url = photo.url.absoluteString
-                    entity.downloadUrl = photo.downloadURL.absoluteString
+                    entity.url = photo.url
+                    entity.downloadURL = photo.downloadURL
                     entity.timestamp = Date()
                 }
                 
@@ -59,7 +59,11 @@ final class CoreDataPhotoStorageRepository: PhotoStorageRepositoryProtocol {
         }
     }
     
-    func fetchPhotos(completion: @escaping (Result<[Photo], StorageError>) -> Void) {
+    func fetchPhotos(
+        page: Int,
+        limit: Int,
+        completion: @escaping (Result<[Photo], StorageError>) -> Void
+    ) {
         let context = self.coreDataStack.newBackgroundContext()
         
         context.perform {
@@ -67,20 +71,27 @@ final class CoreDataPhotoStorageRepository: PhotoStorageRepositoryProtocol {
                 let fetchRequest: NSFetchRequest<PhotoEntity> = PhotoEntity.fetchRequest()
                 fetchRequest.sortDescriptors = [NSSortDescriptor(key: "id", ascending: true)]
                 
+                fetchRequest.fetchOffset = (page - 1) * limit
+                fetchRequest.fetchLimit = limit
+                
                 let entities = try context.fetch(fetchRequest)
                 var photos: [Photo] = []
                 entities.forEach { entity in
-                    if let url = URL(string: entity.url ?? ""), let downloadUrl = URL(string: entity.downloadUrl ?? "") {
-                        let photo = Photo(
-                            id: entity.id ?? "",
-                            author: entity.author ?? "",
-                            width: Int(entity.width),
-                            height: Int(entity.height),
-                            url: url,
-                            downloadURL: downloadUrl
-                        )
-                        photos.append(photo)
-                    }
+                    guard
+                        let url = entity.url,
+                        let downloadURL = entity.downloadURL
+                    else { return }
+                            
+                    let photo = Photo(
+                        id: "\(entity.id)",
+                        author: entity.author ?? "",
+                        width: Int(entity.width),
+                        height: Int(entity.height),
+                        url: url,
+                        downloadURL: downloadURL
+                    )
+                    photos.append(photo)
+                    
                 }
                 
                 DispatchQueue.main.async {
@@ -133,11 +144,11 @@ final class CoreDataPhotoStorageRepository: PhotoStorageRepositoryProtocol {
 
 extension Photo {
     init(entity: PhotoEntity) {
-        self.id = entity.id ?? ""
+        self.id = "\(entity.id)"
         self.author = entity.author ?? ""
         self.width = Int(entity.width)
         self.height = Int(entity.height)
-        self.url = URL(string: entity.url ?? "") ?? URL(string: "https://picsum.photos/200/300")!
-        self.downloadURL = URL(string: entity.downloadUrl ?? "") ?? URL(string: "https://picsum.photos/200/300")!
+        self.url = entity.url ?? URL(string: "https://picsum.photos/0/200/300")!
+        self.downloadURL = entity.downloadURL ?? URL(string: "https://picsum.photos/0/200/300")!
     }
 }

@@ -22,9 +22,13 @@ final class DIContainer {
         return APIPhotoRepository(network: networkService)
     }()
     
+    lazy var coreDataRepository: PhotoStorageRepositoryProtocol = {
+        return CoreDataPhotoStorageRepository(coreDataStack: coreDataStack)
+    }()
+    
     // MARK: - Use Cases
     lazy var fetchPhotosUseCase: FetchPhotosUseCaseProtocol = {
-        return FetchPhotosUseCase(repository: photoRepository)
+        return FetchPhotosUseCase(repository: photoRepository, storageRepository: coreDataRepository)
     }()
     
     lazy var searchPhotosUseCase: SearchPhotosUseCaseProtocol = {
