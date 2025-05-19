@@ -35,9 +35,9 @@ final class ImageLoader {
                 completion(image)
             }
             
-            DispatchQueue.global().async {
-                if let data = image {
-                    self.cacheManager.setImage(data, for: url)
+            if let data = image {
+                DispatchQueue.global().async { [weak self] in
+                    self?.cacheManager.setImage(data, for: url)
                 }
             }
             self.removeOperation(for: taskId)
@@ -88,7 +88,10 @@ final class ImageLoaderOperation: Operation {
                 let `self` = self,
                 !isCancelled,
                 error == nil,
-                let data = data
+                let httpResponse = response as? HTTPURLResponse,
+                (200...299).contains(httpResponse.statusCode),
+                let data = data,
+                data.isEmpty == false
             else {
                 self?.completion(nil)
                 semaphore.signal()
