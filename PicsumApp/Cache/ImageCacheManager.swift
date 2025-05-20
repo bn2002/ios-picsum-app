@@ -8,16 +8,18 @@ import Foundation
 import UIKit
 
 final class ImageCacheManager {
-    static let shared = ImageCacheManager()
+    static let shared = ImageCacheManager(
+        cacheProviders: [
+            MemoryImageCache(maxSize: 100),
+            DiskImageCache()
+        ]
+    )
     
     private let cacheProviders: [ImageCacheProtocol]
     private let queue = DispatchQueue(label: "com.bn2002.picsum.cacheManager", attributes: .concurrent)
     
-    private init() {
-        self.cacheProviders = [
-            MemoryImageCache(maxSize: 100),
-            DiskImageCache()
-        ]
+    init(cacheProviders: [ImageCacheProtocol] = []) {
+        self.cacheProviders = cacheProviders
     }
     
     func getImage(for url: URL) -> Data? {
