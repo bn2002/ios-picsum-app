@@ -17,13 +17,13 @@ final class ImageLoader {
         self.operationQueue = OperationQueue()
         self.operationQueue.maxConcurrentOperationCount = 10
         self.operationQueue.qualityOfService = .userInteractive
-        operationQueue.name = "com.bn2002.picsum.imageLoader"
+        self.operationQueue.name = "com.bn2002.picsum.imageLoader"
     }
     
     func loadImage(from url: URL, completion: @escaping (Data?) -> Void) -> String {
         let taskId = UUID().uuidString
         
-        if let cachedData = cacheManager.getImage(for: url) {
+        if let cachedData = self.cacheManager.getImage(for: url) {
             completion(cachedData)
             return UUID().uuidString
         }

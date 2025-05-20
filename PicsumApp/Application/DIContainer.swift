@@ -58,7 +58,7 @@ final class DIContainer {
     }
     
     func makeLaunchViewModel() -> LaunchViewModel {
-            return LaunchViewModel(initializeUseCase: makeInitializePhotosUseCase())
+            return DefaultLaunchViewModel(initializeUseCase: makeInitializePhotosUseCase())
     }
     
     func makePhotoStorageRepository() -> PhotoStorageRepositoryProtocol {

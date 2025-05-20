@@ -6,7 +6,7 @@
 //
 import Foundation
 
-class APIPhotoRepository: PhotoRepositoryProtocol {
+final class APIPhotoRepository: PhotoRepositoryProtocol {
     private let network: NetworkService
     private let baseURL = Constants.API.Endpoints.list
     

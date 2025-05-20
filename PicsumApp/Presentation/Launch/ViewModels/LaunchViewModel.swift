@@ -13,13 +13,28 @@ enum LaunchState {
     case completed
 }
 
-final class LaunchViewModel {
+protocol LaunchViewModelInput {
+    func viewDidLoad()
+    func retry()
+}
+
+protocol LaunchViewModelOutput {
+    var state: Observable<LaunchState> { get }
+}
+
+protocol LaunchViewModel: LaunchViewModelInput, LaunchViewModelOutput {}
+
+final class DefaultLaunchViewModel: LaunchViewModel {
     private let initializeUseCase: InitializePhotosUseCaseProtocol
     
     let state: Observable<LaunchState> = Observable(.initial)
         
     init(initializeUseCase: InitializePhotosUseCaseProtocol) {
         self.initializeUseCase = initializeUseCase
+    }
+    
+    func viewDidLoad() {
+        self.startInitialization()
     }
     
     func startInitialization(force: Bool = false) {

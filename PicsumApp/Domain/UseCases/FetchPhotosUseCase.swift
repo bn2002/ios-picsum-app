@@ -26,13 +26,13 @@ final class FetchPhotosUseCase: FetchPhotosUseCaseProtocol {
     
     func execute(page: Int, limit: Int, completion: @escaping (Result<[Photo], any Error>) -> Void) {
         storageRepository.fetchPhotos(page: page, limit: limit) { result in
-                    switch result {
-                    case .success(let photos):
-                        completion(.success(photos))
-                    case .failure:
-                        completion(.failure(StorageError.invalidData))
-                        print("Local fetch failed")
-                    }
+            switch result {
+            case .success(let photos):
+                completion(.success(photos))
+            case .failure:
+                completion(.failure(StorageError.invalidData))
+                print("Local fetch failed")
+            }
         }
     }
 

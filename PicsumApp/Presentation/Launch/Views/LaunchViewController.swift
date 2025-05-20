@@ -64,51 +64,51 @@ final class LaunchViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        setupUI()
-        bindViewModel()
-        viewModel.startInitialization()
+        self.setupViews()
+        self.setupBindings()
+        self.viewModel.viewDidLoad()
     }
     
     // MARK: - Setup
     
-    private func setupUI() {
-        view.backgroundColor = .white
+    private func setupViews() {
+        self.view.backgroundColor = .white
         
-        view.addSubview(containerView)
-        containerView.addSubview(logoImageView)
-        containerView.addSubview(progressView)
-        containerView.addSubview(statusLabel)
-        containerView.addSubview(retryButton)
+        self.view.addSubview(self.containerView)
+        self.containerView.addSubview(self.logoImageView)
+        self.containerView.addSubview(self.progressView)
+        self.containerView.addSubview(self.statusLabel)
+        self.containerView.addSubview(self.retryButton)
         
         NSLayoutConstraint.activate([
-            containerView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            containerView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-            containerView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 32),
-            containerView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -32),
+            self.containerView.centerXAnchor.constraint(equalTo: self.view.centerXAnchor),
+            self.containerView.centerYAnchor.constraint(equalTo: self.view.centerYAnchor),
+            self.containerView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: 32),
+            self.containerView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: -32),
             
-            logoImageView.topAnchor.constraint(equalTo: containerView.topAnchor),
-            logoImageView.centerXAnchor.constraint(equalTo: containerView.centerXAnchor),
-            logoImageView.widthAnchor.constraint(equalToConstant: 120),
-            logoImageView.heightAnchor.constraint(equalToConstant: 120),
+            self.logoImageView.topAnchor.constraint(equalTo: self.containerView.topAnchor),
+            self.logoImageView.centerXAnchor.constraint(equalTo: self.containerView.centerXAnchor),
+            self.logoImageView.widthAnchor.constraint(equalToConstant: 120),
+            self.logoImageView.heightAnchor.constraint(equalToConstant: 120),
             
-            progressView.topAnchor.constraint(equalTo: logoImageView.bottomAnchor, constant: 32),
-            progressView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
-            progressView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
+            self.progressView.topAnchor.constraint(equalTo: self.logoImageView.bottomAnchor, constant: 32),
+            self.progressView.leadingAnchor.constraint(equalTo: self.containerView.leadingAnchor),
+            self.progressView.trailingAnchor.constraint(equalTo: self.containerView.trailingAnchor),
             
-            statusLabel.topAnchor.constraint(equalTo: progressView.bottomAnchor, constant: 16),
-            statusLabel.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
-            statusLabel.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
+            self.statusLabel.topAnchor.constraint(equalTo: self.progressView.bottomAnchor, constant: 16),
+            self.statusLabel.leadingAnchor.constraint(equalTo: self.containerView.leadingAnchor),
+            self.statusLabel.trailingAnchor.constraint(equalTo: self.containerView.trailingAnchor),
             
-            retryButton.topAnchor.constraint(equalTo: statusLabel.bottomAnchor, constant: 16),
-            retryButton.centerXAnchor.constraint(equalTo: containerView.centerXAnchor),
-            retryButton.bottomAnchor.constraint(equalTo: containerView.bottomAnchor)
+            self.retryButton.topAnchor.constraint(equalTo: self.statusLabel.bottomAnchor, constant: 16),
+            self.retryButton.centerXAnchor.constraint(equalTo: self.containerView.centerXAnchor),
+            self.retryButton.bottomAnchor.constraint(equalTo: self.containerView.bottomAnchor)
         ])
         
-        retryButton.addTarget(self, action: #selector(retryTapped), for: .touchUpInside)
+        self.retryButton.addTarget(self, action: #selector(self.retryTapped), for: .touchUpInside)
     }
     
-    private func bindViewModel() {
-        viewModel.state.observe(on: self) { [weak self] state in
+    private func setupBindings() {
+        self.viewModel.state.observe(on: self) { [weak self] state in
             self?.handleState(state)
         }
     }
@@ -116,21 +116,21 @@ final class LaunchViewController: UIViewController {
     private func handleState(_ state: LaunchState) {
         switch state {
         case .initial:
-            progressView.progress = 0
-            statusLabel.text = "Preparing..."
-            retryButton.isHidden = true
+            self.progressView.progress = 0
+            self.statusLabel.text = "Preparing..."
+            self.retryButton.isHidden = true
             
         case .loading(let progress):
-            progressView.progress = progress
-            statusLabel.text = "Loading... \(Int(progress * 100))%"
-            retryButton.isHidden = true
+            self.progressView.progress = progress
+            self.statusLabel.text = "Loading... \(Int(progress * 100))%"
+            self.retryButton.isHidden = true
             
         case .error(let error):
-            statusLabel.text = "Error: \(error.localizedDescription)"
-            retryButton.isHidden = false
+            self.statusLabel.text = "Error: \(error.localizedDescription)"
+            self.retryButton.isHidden = false
             
         case .completed:
-            navigateToMain()
+            self.navigateToMain()
         }
     }
     
