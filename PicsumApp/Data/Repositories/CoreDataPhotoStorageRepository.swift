@@ -105,6 +105,61 @@ final class CoreDataPhotoStorageRepository: PhotoStorageRepositoryProtocol {
         }
     }
     
+    func searchPhotos(
+        query: String,
+        page: Int,
+        limit: Int,
+        completion: @escaping (Result<[Photo], StorageError>) -> Void
+    ) {
+        let context = self.coreDataStack.newBackgroundContext()
+
+        context.perform {
+            do {
+                let fetchRequest: NSFetchRequest<PhotoEntity> = PhotoEntity.fetchRequest()
+                fetchRequest.sortDescriptors = [NSSortDescriptor(key: "id", ascending: true)]
+                // Check if query contains only numbers
+                let isNumeric = query.rangeOfCharacter(from: CharacterSet.decimalDigits.inverted) == nil
+                
+                if isNumeric {
+                    // Search by exact ID match
+                    fetchRequest.predicate = NSPredicate(format: "id == %d", Int32(query) ?? 0)
+                } else {
+                    // Search by author name (case-insensitive, contains)
+                    fetchRequest.predicate = NSPredicate(format: "author CONTAINS[cd] %@", query)
+                }
+                
+                // Add pagination
+                fetchRequest.fetchOffset = (page - 1) * limit
+                fetchRequest.fetchLimit = limit
+                
+                let entities = try context.fetch(fetchRequest)
+                let photos = entities.compactMap { entity -> Photo? in
+                    guard
+                        let url = entity.url,
+                        let downloadURL = entity.downloadURL
+                    else { return nil }
+                    
+                    return Photo(
+                        id: "\(entity.id)",
+                        author: entity.author ?? "",
+                        width: Int(entity.width),
+                        height: Int(entity.height),
+                        url: url,
+                        downloadURL: downloadURL
+                    )
+                }
+                
+                DispatchQueue.main.async {
+                    completion(.success(photos))
+                }
+            } catch {
+                DispatchQueue.main.async {
+                    completion(.failure(.fetchError))
+                }
+            }
+        }
+    }
+    
     func clearAll(completion: @escaping (Result<Void, StorageError>) -> Void) {
         let context = self.coreDataStack.newBackgroundContext()
         

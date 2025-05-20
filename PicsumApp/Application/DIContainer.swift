@@ -32,7 +32,7 @@ final class DIContainer {
     }()
     
     lazy var searchPhotosUseCase: SearchPhotosUseCaseProtocol = {
-        return SearchPhotosUseCase()
+        return SearchPhotosUseCase(storageRepository: coreDataRepository)
     }()
     
     lazy var coreDataStack: CoreDataStack = {

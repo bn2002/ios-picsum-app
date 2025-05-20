@@ -83,6 +83,7 @@ final class ImageLoaderOperation: Operation {
         guard !self.isCancelled else { return }
         
         let semaphore = DispatchSemaphore(value: 0)
+        print("Loading image from: \(url)")
         self.dataTask = URLSession.shared.dataTask(with: url) { [weak self] data, response, error in
             guard
                 let `self` = self,

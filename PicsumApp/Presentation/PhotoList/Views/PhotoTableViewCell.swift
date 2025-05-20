@@ -61,6 +61,7 @@ final class PhotoTableViewCell: UITableViewCell {
         self.photoImageView.image = nil
         self.authorLabel.text = nil
         self.sizeLabel.text = nil
+        self.aspectRatioConstraint?.isActive = false
         self.loadingIndicator.stopAnimating()
     }
     

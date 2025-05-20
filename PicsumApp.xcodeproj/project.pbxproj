@@ -332,17 +332,17 @@
 			isa = PBXGroup;
 			children = (
 				44F949FC2DDB2ED500FF4E7E /* ViewModels */,
-				44F949FB2DDB2ED100FF4E7E /* View */,
+				44F949FB2DDB2ED100FF4E7E /* Views */,
 			);
 			path = Launch;
 			sourceTree = "<group>";
 		};
-		44F949FB2DDB2ED100FF4E7E /* View */ = {
+		44F949FB2DDB2ED100FF4E7E /* Views */ = {
 			isa = PBXGroup;
 			children = (
 				44F949FF2DDB2F3100FF4E7E /* LaunchViewController.swift */,
 			);
-			path = View;
+			path = Views;
 			sourceTree = "<group>";
 		};
 		44F949FC2DDB2ED500FF4E7E /* ViewModels */ = {

@@ -27,6 +27,14 @@ protocol PhotoStorageRepositoryProtocol {
         completion: @escaping (Result<[Photo], StorageError>) -> Void
     )
     
+    // Search photo from storage
+    func searchPhotos(
+        query: String,
+        page: Int,
+        limit: Int,
+        completion: @escaping (Result<[Photo], StorageError>) -> Void
+    )
+    
     // Remove all photos from storage
     func clearAll(completion: @escaping (Result<Void, StorageError>) -> Void)
     

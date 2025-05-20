@@ -22,7 +22,10 @@ final class PhotoListViewController: UIViewController {
     private lazy var searchBar: UISearchBar = {
         let searchBar = UISearchBar()
         searchBar.delegate = self
+        searchBar.returnKeyType = .search
+        searchBar.enablesReturnKeyAutomatically = false
         searchBar.placeholder = "Search by author or id"
+        searchBar.textField.delegate = self
         searchBar.translatesAutoresizingMaskIntoConstraints = false
         return searchBar
     }()
@@ -59,6 +62,7 @@ final class PhotoListViewController: UIViewController {
         super.viewDidLoad()
         self.setupViews()
         self.setupBindings()
+        self.setupKeyboardDismiss()
         self.viewModel.viewDidLoad()
     }
     
@@ -155,10 +159,19 @@ final class PhotoListViewController: UIViewController {
         for indexPath in indexPaths {
             guard indexPath.row < self.viewModel.photos.value.count else { continue }
             let photo = self.viewModel.photos.value[indexPath.row]
+            let photoId = photo.id
                         
             // Mark cell as loading
             let taskId = ImageLoader.shared.loadImage(from: photo.optimizedImageURL) { [weak self] image in
                 guard let `self` = self else { return }
+                
+                // Check if the cell is still visible and matches the photoId
+                guard indexPath.row < self.viewModel.photos.value.count,
+                      self.viewModel.photos.value[safe: indexPath.row]?.id == photoId else {
+                    self.imageLoadTasks.removeValue(forKey: indexPath)
+                    return
+                }
+                
                 if let image = image {
                    if let cell = self.tableView.cellForRow(at: indexPath) as? PhotoTableViewCell {
                        cell.configure(with: photo)
@@ -182,6 +195,16 @@ final class PhotoListViewController: UIViewController {
     @objc private func handleRefresh() {
         self.didPreloadInitialImages = false
         self.viewModel.refresh()
+    }
+    
+    private func setupKeyboardDismiss() {
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(self.dismissKeyboard))
+        tapGesture.cancelsTouchesInView = false
+        self.tableView.addGestureRecognizer(tapGesture)
+    }
+
+    @objc private func dismissKeyboard() {
+        self.view.endEditing(true)
     }
     
     // MARK: - Helper Methods
@@ -251,7 +274,7 @@ extension PhotoListViewController: UIScrollViewDelegate {
     
     private func handleScrollStopped() {
         self.scrollTimer?.invalidate()
-        self.scrollTimer = Timer.scheduledTimer(withTimeInterval: scrollStopDelay, repeats: false) { [weak self] _ in
+        self.scrollTimer = Timer.scheduledTimer(withTimeInterval: self.scrollStopDelay, repeats: false) { [weak self] _ in
            self?.loadVisibleImages()
         }
     }
@@ -262,7 +285,7 @@ extension PhotoListViewController: UIScrollViewDelegate {
         self.loadImages(for: visibleIndexPaths)
         
         // After load for visible cell, prefetch next image
-        let nextIndexPaths = calculateNextIndexPathsToPrefetch(after: visibleIndexPaths)
+        let nextIndexPaths = self.calculateNextIndexPathsToPrefetch(after: visibleIndexPaths)
         self.loadImages(for: nextIndexPaths)
     }
     
@@ -279,7 +302,7 @@ extension PhotoListViewController: UIScrollViewDelegate {
 }
 
 // MARK: - UISearchBarDelegate
-extension PhotoListViewController: UISearchBarDelegate {
+extension PhotoListViewController: UISearchBarDelegate, UITextFieldDelegate {
     func searchBar(_ searchBar: UISearchBar, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
         let current = searchBar.text ?? ""
         
@@ -297,25 +320,39 @@ extension PhotoListViewController: UISearchBarDelegate {
                 let endPosition = searchBar.textField.endOfDocument
                 searchBar.textField.selectedTextRange = searchBar.textField.textRange(from: endPosition, to: endPosition)
             }
-
+            self.performSearch(with: truncated)
+            return false
+        }
+                
+        if cleanedText != updated {
+            searchBar.text = cleanedText
+            DispatchQueue.main.async {
+                self.performSearch(with: cleanedText)
+            }
             return false
         }
         
-        if cleanedText != updated {
-            searchBar.text = cleanedText
-            return false
+        DispatchQueue.main.async {
+            self.performSearch(with: cleanedText)
         }
         
         return true
     }
     
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        var searchText = SearchTextValidator.shared.cleanSearchText(searchText)
+        let searchText = SearchTextValidator.shared.cleanSearchText(searchText)
         searchBar.text = searchText
-        self.viewModel.search(query: searchText)
+        self.performSearch(with: searchText)
     }
     
-    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-        searchBar.resignFirstResponder()
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        self.performSearch(with: textField.text ?? "")
+        textField.resignFirstResponder()
+        return true
+    }
+    
+    private func performSearch(with query: String) {
+        self.didPreloadInitialImages = false
+        self.viewModel.search(query: query)
     }
 }

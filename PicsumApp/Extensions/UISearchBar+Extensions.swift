@@ -8,6 +8,10 @@ import UIKit
 
 extension UISearchBar {
     var textField: UITextField {
-        return self.value(forKey: "searchField") as! UITextField
+        if #available(iOS 13.0, *) {
+            return self.searchTextField
+        } else {
+            return self.value(forKey: "searchField") as! UITextField
+        }
     }
 }
